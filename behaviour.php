@@ -138,15 +138,20 @@ class qbehaviour_adaptive_adapted_for_coderunner extends qbehaviour_adaptive {
             $pendingstep->set_fraction($prevbest);
             $pendingstep->set_behaviour_var('_precheck', 1);
             $prevprechecks = $this->qa->get_last_behaviour_var('_numprechecks', 0);
-            $pendingstep->set_behaviour_var('_numprechecks', $prevprechecks + 1);
-            $prevraw = $this->qa->get_last_behaviour_var('_rawfraction', null);
+            $pendingstep->set_behaviour_var('_numprechecks', $prevprechecks + ($pendingstep->has_qt_var('_check') ? 1 : 0));
         } else {
             if (is_null($prevbest)) {
                 $prevbest = 0;
             }
-            $pendingstep->set_fraction(max($prevbest, $this->adjusted_fraction($fraction, $prevtries)));
             $pendingstep->set_behaviour_var('_precheck', 0);
-            $pendingstep->set_behaviour_var('_rawfraction', $fraction);
+
+            if ($pendingstep->has_qt_var('_check')) {
+                $pendingstep->set_fraction(max($prevbest, $this->adjusted_fraction($fraction, $prevtries)));
+                $pendingstep->set_behaviour_var('_rawfraction', $fraction);
+            } else {
+                $pendingstep->set_fraction($prevbest);
+                $pendingstep->set_behaviour_var('_rawfraction', $prevbest);
+            }
         }
         $pendingstep->set_new_response_summary($this->question->summarise_response($response));
 
