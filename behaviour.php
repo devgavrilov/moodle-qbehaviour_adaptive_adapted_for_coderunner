@@ -131,7 +131,7 @@ class qbehaviour_adaptive_adapted_for_coderunner extends qbehaviour_adaptive {
             $pendingstep->set_state(question_state::$todo);
         }
 
-        $pendingstep->set_behaviour_var('_try', $prevtries + 1);
+        $pendingstep->set_behaviour_var('_try', $prevtries + ($pendingstep->has_qt_var('_check') ? 1 : 0));
 
         if ($isprecheck) {
             // Leave mark unchanged. Increment try and numprechecks.
