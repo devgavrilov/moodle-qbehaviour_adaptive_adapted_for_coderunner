@@ -229,48 +229,16 @@ class qbehaviour_adaptive_adapted_for_coderunner extends qbehaviour_adaptive {
             return question_attempt::DISCARD;
         }
 
-        $prevtries = $this->qa->get_last_behaviour_var('_try', 0);
-        $prevbest = $this->qa->get_fraction();
-        if (is_null($prevbest)) {
-            $prevbest = 0;
-        }
+        $last_graded_step = $this->qa->get_last_step_with_qt_var('_check');
 
-        $laststep = $this->qa->get_last_step();
-        $response = $laststep->get_qt_data();
-        if (!$this->question->is_gradable_response($response)) {
-            $state = question_state::$gaveup;
-            $fraction = 0;
+        if ($last_graded_step == null) {
+            $pendingstep->set_state(question_state::$gaveup);
+            $pendingstep->set_fraction(0);
         } else {
-
-            if ($laststep->has_behaviour_var('_try')) {
-                // Last answer was graded, we want to regrade it. Otherwise the answer
-                // has changed, and we are grading a new try.
-
-                // There is a Moodle bug here, resulting in regrading of
-                // already-graded questions.
-                // See https://tracker.moodle.org/browse/MDL-42399.
-                $prevtries -= 1;
-            }
-
-            /****** Changed bit #2 begins ***.
-             * Cache extra data from grade response */
-            $gradedata = $this->question->grade_response($response);
-            list($fraction, $state) = $gradedata;
-            if (count($gradedata) > 2) {
-                foreach ($gradedata[2] as $name => $value) {
-                    $pendingstep->set_qt_var($name, $value);
-                }
-            }
-            $pendingstep->set_behaviour_var('_precheck', 0);
-            /* *** end of changed bit #2 ***/
-
-            $pendingstep->set_behaviour_var('_try', $prevtries + 1);
-            $pendingstep->set_behaviour_var('_rawfraction', $fraction);
-            $pendingstep->set_new_response_summary($this->question->summarise_response($response));
+            $pendingstep->set_state($last_graded_step->get_state());
+            $pendingstep->set_fraction($last_graded_step->get_fraction());
         }
 
-        $pendingstep->set_state($state);
-        $pendingstep->set_fraction(max($prevbest, $this->adjusted_fraction($fraction, $prevtries)));
         return question_attempt::KEEP;
     }
 
