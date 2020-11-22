@@ -231,12 +231,12 @@ class qbehaviour_adaptive_adapted_for_coderunner extends qbehaviour_adaptive {
 
         $last_graded_step = $this->qa->get_last_step_with_qt_var('_check');
 
-        if ($last_graded_step == null) {
-            $pendingstep->set_state(question_state::$gaveup);
-            $pendingstep->set_fraction(0);
-        } else {
+        if ($last_graded_step->has_qt_var('_check')) {
             $pendingstep->set_state($last_graded_step->get_state());
             $pendingstep->set_fraction($last_graded_step->get_fraction());
+        } else {
+            $pendingstep->set_state(question_state::$gaveup);
+            $pendingstep->set_fraction(0);
         }
 
         return question_attempt::KEEP;
