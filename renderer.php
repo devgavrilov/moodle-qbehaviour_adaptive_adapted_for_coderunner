@@ -31,6 +31,13 @@ require_once($CFG->dirroot . '/question/behaviour/adaptive/renderer.php');
 class qbehaviour_adaptive_adapted_for_coderunner_renderer extends qbehaviour_adaptive_renderer
 {
     public function controls(question_attempt $qa, question_display_options $options) {
+        if ($qa->get_last_step()->has_qt_var('_run_ids') && !$qa->get_last_step()->has_qt_var('_testoutcome')) {
+            $is_outdated = $qa->get_last_step()->get_timecreated() < time() - 60 * 5;
+            if (!$is_outdated) {
+                $options->readonly = true;
+            }
+        }
+
         $question = $qa->get_question();
         if (!empty($question->precheck)) {
             $buttons = $this->precheck_button($qa, $options) . "\n" . $this->submit_button($qa, $options);
